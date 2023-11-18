@@ -4,3 +4,4 @@
 # Docker image files (if you have specific image files to ignore)
 Dockerfile
 *.dockerignore
+/env-file
