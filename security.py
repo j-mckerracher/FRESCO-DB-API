@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from typing import Optional
-from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -8,6 +7,8 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy.testing.pickleable import User
 from models import SessionLocal
+from jwt import PyJWTError
+import jwt
 import models
 import os
 
@@ -76,7 +77,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         if user is None:
             raise credentials_exception
         return user
-    except JWTError:
+    except PyJWTError:
         raise credentials_exception
 
 
