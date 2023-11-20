@@ -59,10 +59,31 @@ def read_job_data_single_jid(job_data_id: str, db_user: Tuple[Session, models.Ap
     return db_items
 
 
+# -------------- host data endpoints -------------------------------------------------------------
+
 @app.get("/host_data_job_id/{job_data_id}", response_model=List[schemas.HostData])
 def read_host_data_single_jid(job_data_id: str, db_user: Tuple[Session, models.ApiUser] = Depends(get_db_and_user)):
     db, current_user = db_user
     db_items = crud.get_host_data_by_job_id(db, job_data_id=job_data_id)
+    if not db_items:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return db_items
+
+
+@app.get("/host_data_node_id/{node_id}", response_model=List[schemas.HostData])
+def read_host_data_single_node(node_id: str, db_user: Tuple[Session, models.ApiUser] = Depends(get_db_and_user)):
+    db, current_user = db_user
+    print("calling get_host_data_by_host_id")
+    db_items = crud.get_host_data_by_host_id(db, host_id=node_id)
+    if not db_items:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return db_items
+
+
+@app.get("/host_data_datetime/{time_input}", response_model=List[schemas.HostData])  # TODO - fix
+def read_host_data_by_datetime(time_input: str, db_user: Tuple[Session, models.ApiUser] = Depends(get_db_and_user)):
+    db, current_user = db_user
+    db_items = crud.get_host_data_by_datetime(db, time_input=time_input, row_limit=150)
     if not db_items:
         raise HTTPException(status_code=404, detail="Item not found")
     return db_items

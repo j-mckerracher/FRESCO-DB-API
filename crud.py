@@ -1,41 +1,11 @@
 from sqlalchemy.orm import Session
+from datetime import datetime, timedelta
 import models
 
 
 # ------------------------------- Functions for the host_data table -------------------------------
 
-def get_host_data(db: Session, skip: int = 0, limit: int = 100):
-    """
-    Retrieve a subset of records from the 'host_data' table.
-
-    This function queries the 'host_data' table using SQLAlchemy and returns a list of 'HostData' objects.
-    It supports pagination functionality by allowing control over the offset (skip) and the number of
-    records (limit) returned. This is particularly useful for applications that require data to be
-    displayed in a paginated format.
-
-    Parameters:
-    :param: db (Session): An instance of the SQLAlchemy Session, used to perform database queries.
-                         The session represents the 'staging zone' for all objects loaded into the database session.
-    :param: skip (int, optional): The number of records to skip from the start. Used for pagination. Defaults to 0.
-                                 For instance, if skip is 10, the query skips the first 10 records.
-    :param: limit (int, optional): The maximum number of records to return from the query. Defaults to 100.
-                                  This controls the size of the result set and is useful for limiting the data
-                                  fetched from the database, especially in a paginated API.
-
-    :return: List[HostData]: A list of 'HostData' objects representing the records fetched from the 'host_data' table,
-                            considering the specified offset (skip) and limit.
-
-    Usage example:
-    # Fetch the first 100 records
-    host_data_records = get_host_data(db_session)
-
-    # Fetch the next 100 records
-    next_host_data_records = get_host_data(db_session, skip=100, limit=100)
-    """
-    return db.query(models.HostData).offset(skip).limit(limit).all()
-
-
-def get_host_data_by_id(db: Session, host_data_id: int):
+def get_host_data_by_host_id(db: Session, host_id: str, row_limit: int = 100):
     """
     Retrieve a specific record from the 'host_data' table by its identifier.
 
@@ -54,9 +24,28 @@ def get_host_data_by_id(db: Session, host_data_id: int):
 
     Usage example:
     # Fetch a specific host data record by its ID
-    specific_host_data = get_host_data_by_id(db_session, host_data_id=456)
+    specific_host_data = get_host_data_by_id(db_session, host_id=NODE2)
     """
-    return db.query(models.HostData).filter(models.HostData.id == host_data_id).first()
+    print(f"In get_host_data_by_host_id - querying for {host_id}")
+    return db.query(models.HostData).filter(models.HostData.host == host_id).limit(row_limit).all()
+
+
+def get_host_data_by_job_id(db: Session, job_data_id: str, row_limit: int = 100):
+    return db.query(models.HostData).filter(models.HostData.jid == job_data_id).limit(row_limit).all()
+
+
+def get_host_data_by_datetime(db: Session, time_input: str, row_limit: int = 100):
+    # Convert the string to a datetime object
+    date_obj = datetime.strptime(time_input, "%m-%d-%Y")
+
+    print(f"date = {date_obj}")
+
+    # Filter using the date part only
+    # Assuming models.HostData.time is a DateTime field
+    return db.query(models.HostData).filter(
+        models.HostData.time >= date_obj,
+        models.HostData.time < date_obj + timedelta(days=1)
+    ).limit(row_limit).all()
 
 
 # ------------------------------- Functions for the job_data table -------------------------------
@@ -103,8 +92,3 @@ def get_job_data_by_id(db: Session, job_data_id: str):
     List[JobData]: A list of JobData records matching the given jid.
     """
     return db.query(models.JobData).filter(models.JobData.jid == job_data_id).all()
-
-
-def get_host_data_by_job_id(db: Session, job_data_id: str):
-    return db.query(models.HostData).filter(models.HostData.jid == job_data_id).all()
-
