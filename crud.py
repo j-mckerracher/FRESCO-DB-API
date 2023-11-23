@@ -55,12 +55,10 @@ def get_job_data_by_id(db: Session, job_data_id: str, row_limit: int = 100):
     """
     Fetch all job data records with a given job identifier (jid).
 
-    Args:
-    db (Session): The database session to use for the query.
-    job_data_id (str): The job identifier to filter the records.
+    :param: db (Session): The database session to use for the query.
+    :param: job_data_id (str): The job identifier to filter the records.
 
-    Returns:
-    List[JobData]: A list of JobData records matching the given jid.
+    :return: List[JobData]: A list of JobData records matching the given jid.
     """
     print(f"in get_job_data_by_id using {job_data_id}")
     return db.query(models.JobData).filter(models.JobData.jid == job_data_id).limit(row_limit).all()
