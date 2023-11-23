@@ -5,7 +5,7 @@ import os
 
 SQLALCHEMY_DATABASE_URL = f"postgresql://{os.getenv('DBUSER')}:{os.getenv('DBPW')}@{os.getenv('DBHOST')}/{os.getenv('DBNAME')}"
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)
+engine = create_engine(SQLALCHEMY_DATABASE_URL)  # add echo=True to help debugging
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
@@ -44,7 +44,7 @@ class JobData(Base):
     state = Column(String(64))
     jobname = Column(Text)
     exitcode = Column(Text)
-    host_list = Column(ARRAY(Text))
+    host_list = Column(ARRAY(String))
 
 
 class ApiUser(Base):

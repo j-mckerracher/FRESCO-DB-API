@@ -50,37 +50,8 @@ def get_host_data_by_datetime(db: Session, time_input: str, row_limit: int = 100
 
 # ------------------------------- Functions for the job_data table -------------------------------
 
-def get_job_data(db: Session, skip: int = 0, limit: int = 100):
-    """
-    Retrieve a subset of records from the 'job_data' table.
 
-    This function queries the 'job_data' table using SQLAlchemy and returns a list of 'JobData' objects.
-    It is designed to support pagination by allowing control over the offset (skip) and the number of
-    records (limit) returned.
-
-    Parameters:
-    :param: db (Session): An instance of the SQLAlchemy Session. This session is used to query the database.
-                      It represents the 'staging zone' for all the objects loaded into the database session.
-    :param: skip (int, optional): The number of records to skip in the query, used for pagination. Defaults to 0.
-                              For example, if skip is 10, the query will skip the first 10 records.
-    :param: limit (int, optional): The maximum number of records to return in the query. Defaults to 100.
-                               This controls the size of the result set and is useful for limiting the data
-                               fetched from the database, particularly in a paginated API.
-
-    :return List[JobData]: A list of 'JobData' objects representing the records fetched from the 'job_data' table,
-                       considering the specified offset and limit.
-
-    Usage example:
-    # Fetch the first 100 records
-    job_data_records = get_job_data(db_session)
-
-    # Fetch the next 100 records
-    next_job_data_records = get_job_data(db_session, skip=100, limit=100)
-    """
-    return db.query(models.JobData).offset(skip).limit(limit).all()
-
-
-def get_job_data_by_id(db: Session, job_data_id: str):
+def get_job_data_by_id(db: Session, job_data_id: str, row_limit: int = 100):
     """
     Fetch all job data records with a given job identifier (jid).
 
@@ -91,4 +62,26 @@ def get_job_data_by_id(db: Session, job_data_id: str):
     Returns:
     List[JobData]: A list of JobData records matching the given jid.
     """
-    return db.query(models.JobData).filter(models.JobData.jid == job_data_id).all()
+    print(f"in get_job_data_by_id using {job_data_id}")
+    return db.query(models.JobData).filter(models.JobData.jid == job_data_id).limit(row_limit).all()
+
+
+def get_job_data_by_user(db: Session, user_id: str, row_limit: int = 100):
+    return db.query(models.JobData).filter(models.JobData.username == user_id).limit(row_limit).all()
+
+
+def get_job_data_by_job_name(db: Session, job_name: str, row_limit: int = 100):
+    return db.query(models.JobData).filter(models.JobData.jobname == job_name).limit(row_limit).all()
+
+
+def get_job_data_by_host_id(db: Session, host_id: str, row_limit: int = 100):
+    print(f"In get_job_data_by_host_id - querying for {host_id}")
+    return db.query(models.JobData).filter(models.JobData.host_list.any(host_id)).limit(row_limit).all()
+
+
+def get_job_data_by_account(db: Session, account_id: str, row_limit: int = 100):
+    return db.query(models.JobData).filter(models.JobData.account == account_id).limit(row_limit).all()
+
+
+def get_job_data_by_exit_code(db: Session, exit_code: str, row_limit: int = 100):
+    return db.query(models.JobData).filter(models.JobData.exitcode == exit_code).limit(row_limit).all()
