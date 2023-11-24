@@ -3,11 +3,16 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
 
-SQLALCHEMY_DATABASE_URL = f"postgresql://{os.getenv('DBUSER')}:{os.getenv('DBPW')}@{os.getenv('DBHOST')}/{os.getenv('DBNAME')}"
+# Engine and session for HostData and JobData models
+HOST_AND_JOB_DATA_ENGINE_URL = f"postgresql://{os.getenv('DBUSER')}:{os.getenv('DBPW')}@{os.getenv('DBHOST')}/{os.getenv('DBNAME')}"
+host_and_data_table_engine = create_engine(HOST_AND_JOB_DATA_ENGINE_URL)  # add echo=True to help debugging
+SessionLocalHostJob = sessionmaker(autocommit=False, autoflush=False, bind=host_and_data_table_engine)
+Base = declarative_base()
 
-engine = create_engine(SQLALCHEMY_DATABASE_URL)  # add echo=True to help debugging
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
+# Engine and session for ApiUser model
+API_USER_ENGINE_URL = f"postgresql://{os.getenv('DBUSER_API')}:{os.getenv('DBPW_API')}@{os.getenv('DBHOST')}/{os.getenv('DBNAME')}"
+api_user_table_engine = create_engine(API_USER_ENGINE_URL)  # add echo=True to help debugging
+SessionLocalApiUser = sessionmaker(autocommit=False, autoflush=False, bind=api_user_table_engine)
 Base = declarative_base()
 
 

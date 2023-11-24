@@ -6,7 +6,6 @@ from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy.testing.pickleable import User
-from models import SessionLocal
 from jwt import PyJWTError
 import jwt
 import models
@@ -18,8 +17,8 @@ ALGORITHM = os.environ["FASTAPI_SECURITY_KEY_ALGO"]
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
-def get_db():
-    db = SessionLocal()
+def get_db_api_user():
+    db = models.SessionLocalApiUser()
     try:
         yield db
     finally:
@@ -62,7 +61,7 @@ def get_user(db: Session, username: str):
     return db.query(models.ApiUser).filter(models.ApiUser.username == username).first()
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db_api_user)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

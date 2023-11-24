@@ -26,7 +26,6 @@ def get_host_data_by_host_id(db: Session, host_id: str, row_limit: int = 100):
     # Fetch a specific host data record by its ID
     specific_host_data = get_host_data_by_id(db_session, host_id=NODE2)
     """
-    print(f"In get_host_data_by_host_id - querying for {host_id}")
     return db.query(models.HostData).filter(models.HostData.host == host_id).limit(row_limit).all()
 
 
@@ -37,8 +36,6 @@ def get_host_data_by_job_id(db: Session, job_data_id: str, row_limit: int = 100)
 def get_host_data_by_datetime(db: Session, time_input: str, row_limit: int = 100):
     # Convert the string to a datetime object
     date_obj = datetime.strptime(time_input, "%m-%d-%Y")
-
-    print(f"date = {date_obj}")
 
     # Filter using the date part only
     # Assuming models.HostData.time is a DateTime field
@@ -60,7 +57,6 @@ def get_job_data_by_id(db: Session, job_data_id: str, row_limit: int = 100):
 
     :return: List[JobData]: A list of JobData records matching the given jid.
     """
-    print(f"in get_job_data_by_id using {job_data_id}")
     return db.query(models.JobData).filter(models.JobData.jid == job_data_id).limit(row_limit).all()
 
 
@@ -73,7 +69,6 @@ def get_job_data_by_job_name(db: Session, job_name: str, row_limit: int = 100):
 
 
 def get_job_data_by_host_id(db: Session, host_id: str, row_limit: int = 100):
-    print(f"In get_job_data_by_host_id - querying for {host_id}")
     return db.query(models.JobData).filter(models.JobData.host_list.any(host_id)).limit(row_limit).all()
 
 

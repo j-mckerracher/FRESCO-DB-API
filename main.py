@@ -6,17 +6,17 @@ import crud
 import models
 import schemas
 import security
-from models import SessionLocal, engine
+from models import SessionLocalHostJob, host_and_data_table_engine
 from fastapi.security import OAuth2PasswordRequestForm
 
-models.Base.metadata.create_all(bind=engine)
+models.Base.metadata.create_all(bind=host_and_data_table_engine)
 app = FastAPI()
 ROW_LIMIT = 300
 
 
 # -------------- helpers -------------------------------------------------------------
 
-def get_db():
+def get_db_host_job_tables():
     """
     Provides a database session for a single request, and closes it afterwards.
 
@@ -26,7 +26,7 @@ def get_db():
     :yield: A SQLAlchemy SessionLocal instance for database operations.
     :raises HTTPException: If an error occurs during session creation or closure.
     """
-    db = SessionLocal()
+    db = SessionLocalHostJob()
     try:
         yield db
     except Exception as e:
@@ -35,7 +35,7 @@ def get_db():
         db.close()
 
 
-def get_db_and_user(db: Session = Depends(get_db),
+def get_db_and_user(db: Session = Depends(get_db_host_job_tables),
                     current_user: models.ApiUser = Depends(security.get_current_active_user)):
     """
     Retrieve the database session and the current authenticated user.
@@ -55,7 +55,7 @@ def get_db_and_user(db: Session = Depends(get_db),
 # -------------- authorization endpoint -------------------------------------------------------------
 
 @app.post("/token", response_model=security.Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db_host_job_tables)):
     """
     Authenticate a user and return an access token.
 
@@ -231,7 +231,6 @@ def read_host_data_single_jid(job_data_id: str, db_user: Tuple[Session, models.A
             raise HTTPException(status_code=404, detail=f"Host data for job ID {job_data_id} not found")
         return db_items
     except Exception as e:
-        # Log the exception details here if needed
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -253,5 +252,4 @@ def read_host_data_single_node(node_id: str, db_user: Tuple[Session, models.ApiU
             raise HTTPException(status_code=404, detail=f"Host data for node {node_id} not found")
         return db_items
     except Exception as e:
-        # Log the exception details here if needed
         raise HTTPException(status_code=500, detail=str(e))
