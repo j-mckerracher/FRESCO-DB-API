@@ -10,6 +10,11 @@ from jwt import PyJWTError
 import jwt
 import models
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 SECRET_KEY = os.environ["FASTAPI_SECURITY_KEY"]
@@ -76,6 +81,7 @@ def verify_password(plain_password, hashed_password):
     # Verifying a user's password during login
     is_password_correct = verify_password(user_input_password, stored_hashed_password)
     """
+    logger.info("Verifying password")
     return pwd_context.verify(plain_password, hashed_password)
 
 
@@ -119,13 +125,20 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     # Creating an access token for a user with a specific expiration time
     access_token = create_access_token(data={"sub": user_id}, expires_delta=timedelta(hours=1))
     """
+    logger.info("Creating access token")
+
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
+        logger.info(f"Custom expiration delta set: {expires_delta}")
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
+        logger.info("Using default expiration delta: 15 minutes")
+
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+    logger.info("Access token created successfully")
     return encoded_jwt
 
 
@@ -148,6 +161,7 @@ def get_user(db: Session, username: str):
     # Retrieve a user record by username
     user = get_user(db_session, username="johndoe")
     """
+    logger.info("Getting user from the database.")
     return db.query(models.ApiUser).filter(models.ApiUser.username == username).first()
 
 
@@ -176,6 +190,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     async def read_users_me(current_user: models.ApiUser = Depends(get_current_user)):
         return current_user
     """
+    logger.info("Retrieving current user from token")
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -183,14 +199,23 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        logger.info("Token successfully decoded")
+
         username: str = payload.get("sub")
         if username is None:
+            logger.error("Username not found in token")
             raise credentials_exception
+
+        logger.info(f"Extracted username from token: {username}")
         user = get_user(db, username=username)
         if user is None:
+            logger.error(f"User not found in database for username: {username}")
             raise credentials_exception
+
+        logger.info(f"User {username} retrieved successfully")
         return user
     except PyJWTError:
+        logger.exception("Error decoding JWT")
         raise credentials_exception
 
 
