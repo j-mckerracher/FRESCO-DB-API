@@ -6,9 +6,10 @@ import crud
 import models
 import schemas
 import security
-from models import SessionLocalHostJob, host_and_data_table_engine
+from models import host_and_data_table_engine
 from fastapi.security import OAuth2PasswordRequestForm
 import logging
+# import uvicorn - use when debugging
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -23,7 +24,7 @@ ROW_LIMIT = 300
 
 def get_db_host_job_tables():
     """
-    Provides a database session for a single request, and closes it afterwards.
+    Provides a database session for a single request, and closes it afterward.
 
     Yields a SQLAlchemy SessionLocal instance that is used for database operations. The session is
     closed once the request is complete.
@@ -31,13 +32,38 @@ def get_db_host_job_tables():
     :yield: A SQLAlchemy SessionLocal instance for database operations.
     :raises HTTPException: If an error occurs during session creation or closure.
     """
-    db = SessionLocalHostJob()
+    db = models.SessionLocalHostJob()
     try:
         logger.info("get_db_host_job_tables returning database session")
         yield db
     except Exception as e:
         logger.error("Error in get_db_host_job_tables: %s", str(e))
         raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+
+def get_db_api_user():
+    """
+    Create and manage a database session for API user models.
+
+    This function initializes a database session using the `SessionLocalApiUser` method from the `models` module,
+    specifically for interactions with the API user data models. It is designed to be used as a context manager,
+    ensuring that the database session is properly opened and closed. The function yields the database session to
+    the caller and ensures that the session is closed properly, regardless of whether an exception occurs or not.
+
+    Yields:
+    :yield: Session: The SQLAlchemy Session object for API user database transactions.
+
+    Usage example:
+    # Using the function with a 'with' statement
+    with get_db_api_user() as db:
+        # Perform database operations using 'db'
+        pass
+    """
+    db = models.SessionLocalApiUser()
+    try:
+        yield db
     finally:
         db.close()
 
@@ -64,7 +90,7 @@ def get_db_and_user(db: Session = Depends(get_db_host_job_tables),
 # -------------- authorization endpoint -------------------------------------------------------------
 
 @app.post("/token", response_model=security.Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db_host_job_tables)):
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db_api_user)):
     """
     Authenticate a user and return an access token.
 
@@ -115,7 +141,8 @@ def read_job_data_single_jid(job_id: str, db_user: Tuple[Session, models.ApiUser
     """
     Fetch all job data records associated with a given job ID.
 
-    :param: job_id (str): The job identifier used to filter the job data records. :param: db_user (Tuple[Session,
+    :param: job_id (str): The job identifier used to filter the job data records.
+    :param: db_user (Tuple[Session,
     models.ApiUser]): A tuple containing the database session and the current authenticated user.
 
     :return: List[schemas.JobData]: A list of JobData records where the job_id matches the specified value.
@@ -144,7 +171,8 @@ def read_job_data_single_user(user_id: str, db_user: Tuple[Session, models.ApiUs
     """
     Fetch all job data records associated with a given user ID.
 
-    :param: user_id (str): The user identifier used to filter the job data records. :param: db_user (Tuple[Session,
+    :param: user_id (str): The user identifier used to filter the job data records.
+    :param: db_user (Tuple[Session,
     models.ApiUser]): A tuple containing the database session and the current authenticated user.
 
     :return: List[schemas.JobData]: A list of JobData records where the user_id matches the specified value.
@@ -173,7 +201,8 @@ def read_job_data_single_job_name(job_name: str, db_user: Tuple[Session, models.
     """
     Fetch all job data records associated with a given job name.
 
-    :param: job_name (str): The job name used to filter the job data records. :param: db_user (Tuple[Session,
+    :param: job_name (str): The job name used to filter the job data records.
+    :param: db_user (Tuple[Session,
     models.ApiUser]): A tuple containing the database session and the current authenticated user.
 
     :return: List[schemas.JobData]: A list of JobData records where the job_name matches the specified value.
@@ -202,7 +231,8 @@ def read_job_data_single_host(host_id: str, db_user: Tuple[Session, models.ApiUs
     """
     Fetch all job data records associated with a given host ID.
 
-    :param: host_id (str): The host identifier used to filter the job data records. :param: db_user (Tuple[Session,
+    :param: host_id (str): The host identifier used to filter the job data records.
+    :param: db_user (Tuple[Session,
     models.ApiUser]): A tuple containing the database session and the current authenticated user.
 
     :return: List[schemas.JobData]: A list of JobData records where the host_id is present in the job's host list.
@@ -231,7 +261,8 @@ def read_job_data_single_account(account_id: str, db_user: Tuple[Session, models
     """
     Fetch all job data records associated with a given account ID.
 
-    :param: account_id (str): The account identifier used to filter the job data records. :param: db_user (Tuple[
+    :param: account_id (str): The account identifier used to filter the job data records.
+    :param: db_user (Tuple[
     Session, models.ApiUser]): A tuple containing the database session and the current authenticated user.
 
     :return: List[schemas.JobData]: A list of JobData records where the account_id matches the specified value.
@@ -260,7 +291,8 @@ def read_job_data_single_exit_code(exit_code: str, db_user: Tuple[Session, model
     """
     Fetch all job data records associated with a given exit code.
 
-    :param: exit_code (str): The exit code used to filter the job data records. :param: db_user (Tuple[Session,
+    :param: exit_code (str): The exit code used to filter the job data records.
+    :param: db_user (Tuple[Session,
     models.ApiUser]): A tuple containing the database session and the current authenticated user.
 
     :return: List[schemas.JobData]: A list of JobData records where the exit_code matches the specified value.
@@ -291,7 +323,8 @@ def read_host_data_single_jid(job_data_id: str, db_user: Tuple[Session, models.A
     """
     Fetch all host data records associated with a given job data ID.
 
-    :param: job_data_id (str): The job data identifier used to filter the host data records. :param: db_user (Tuple[
+    :param: job_data_id (str): The job data identifier used to filter the host data records.
+    :param: db_user (Tuple[
     Session, models.ApiUser]): A tuple containing the database session and the current authenticated user.
 
     :return: List[schemas.HostData]: A list of HostData records where the job_data_id is associated with the job data
@@ -342,3 +375,8 @@ def read_host_data_single_node(node_id: str, db_user: Tuple[Session, models.ApiU
     except Exception as e:
         logger.error("Unexpected error while fetching host data for node ID %s: %s", node_id, str(e))
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# this is for debugging only
+# if __name__ == "__main__":
+#     uvicorn.run(app, host="0.0.0.0", port=8001)
