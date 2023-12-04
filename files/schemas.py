@@ -16,7 +16,7 @@ class HostData(BaseModel):
     arc: Optional[float] = None
 
     class Config:
-        orm_mode = True
+        from_attributes= True
 
 
 # Pydantic model for JobData
@@ -40,4 +40,4 @@ class JobData(BaseModel):
     host_list: Optional[List[str]] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True
