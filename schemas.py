@@ -16,7 +16,7 @@ class HostData(BaseModel):
     arc: Optional[float] = None
 
     class Config:
-        from_attributes= True
+        from_attributes = True
 
 
 # Pydantic model for JobData
