@@ -9,7 +9,8 @@ import security
 from models import host_and_data_table_engine
 from fastapi.security import OAuth2PasswordRequestForm
 import logging
-# import uvicorn - use when debugging
+# import uvicorn
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
