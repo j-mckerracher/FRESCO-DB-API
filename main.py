@@ -152,7 +152,11 @@ def read_job_data_single_jid(job_id: str, db_user: Tuple[Session, models.ApiUser
     db, current_user = db_user
     try:
         logger.info("Fetching job data for job ID: %s", job_id)
-        db_items = crud.get_job_data_by_id(db, job_data_id=job_id, row_limit=ROW_LIMIT)
+        db_items = crud.get_job_data_by_id(job_data_id=job_id, row_limit=ROW_LIMIT)
+
+        if db_items is None:
+            logger.error("Failed to establish database connection.")
+            raise HTTPException(status_code=500, detail="Internal server error")
 
         if not db_items:
             logger.warning("No job data found for job ID: %s", job_id)
@@ -160,8 +164,6 @@ def read_job_data_single_jid(job_id: str, db_user: Tuple[Session, models.ApiUser
 
         logger.info("Successfully retrieved job data for job ID: %s", job_id)
         return db_items
-    except HTTPException as e:
-        raise e
     except Exception as e:
         logger.error("Unexpected error while fetching job data for job ID %s: %s", job_id, str(e))
         raise HTTPException(status_code=500, detail=str(e))
@@ -182,7 +184,7 @@ def read_job_data_single_user(user_id: str, db_user: Tuple[Session, models.ApiUs
     db, current_user = db_user
     try:
         logger.info("Fetching job data for user ID: %s", user_id)
-        db_items = crud.get_job_data_by_user(db, user_id=user_id, row_limit=ROW_LIMIT)
+        db_items = crud.get_job_data_by_user(user_id=user_id, row_limit=ROW_LIMIT)
 
         if not db_items:
             logger.warning("No job data found for user ID: %s", user_id)
@@ -190,8 +192,7 @@ def read_job_data_single_user(user_id: str, db_user: Tuple[Session, models.ApiUs
 
         logger.info("Successfully retrieved job data for user ID: %s", user_id)
         return db_items
-    except HTTPException as e:
-        raise e
+
     except Exception as e:
         logger.error("Unexpected error while fetching job data for user ID %s: %s", user_id, str(e))
         raise HTTPException(status_code=500, detail=str(e))
@@ -212,7 +213,7 @@ def read_job_data_single_job_name(job_name: str, db_user: Tuple[Session, models.
     db, current_user = db_user
     try:
         logger.info("Fetching job data for job name: %s", job_name)
-        db_items = crud.get_job_data_by_job_name(db, job_name=job_name, row_limit=ROW_LIMIT)
+        db_items = crud.get_job_data_by_job_name(job_name=job_name, row_limit=ROW_LIMIT)
 
         if not db_items:
             logger.warning("No job data found for job name: %s", job_name)
@@ -220,8 +221,6 @@ def read_job_data_single_job_name(job_name: str, db_user: Tuple[Session, models.
 
         logger.info("Successfully retrieved job data for job name: %s", job_name)
         return db_items
-    except HTTPException as e:
-        raise e
     except Exception as e:
         logger.error("Unexpected error while fetching job data for job name %s: %s", job_name, str(e))
         raise HTTPException(status_code=500, detail=str(e))
@@ -242,7 +241,7 @@ def read_job_data_single_host(host_id: str, db_user: Tuple[Session, models.ApiUs
     db, current_user = db_user
     try:
         logger.info("Fetching job data for host ID: %s", host_id)
-        db_items = crud.get_job_data_by_host_id(db, host_id=host_id, row_limit=ROW_LIMIT)
+        db_items = crud.get_job_data_by_host_id(host_id=host_id, row_limit=ROW_LIMIT)
 
         if not db_items:
             logger.warning("No job data found for host ID: %s", host_id)
@@ -250,8 +249,6 @@ def read_job_data_single_host(host_id: str, db_user: Tuple[Session, models.ApiUs
 
         logger.info("Successfully retrieved job data for host ID: %s", host_id)
         return db_items
-    except HTTPException as e:
-        raise e
     except Exception as e:
         logger.error("Unexpected error while fetching job data for host ID %s: %s", host_id, str(e))
         raise HTTPException(status_code=500, detail=str(e))
@@ -272,7 +269,7 @@ def read_job_data_single_account(account_id: str, db_user: Tuple[Session, models
     db, current_user = db_user
     try:
         logger.info("Fetching job data for account ID: %s", account_id)
-        db_items = crud.get_job_data_by_account(db, account_id=account_id, row_limit=ROW_LIMIT)
+        db_items = crud.get_job_data_by_account(account_id=account_id, row_limit=ROW_LIMIT)
 
         if not db_items:
             logger.warning("No job data found for account ID: %s", account_id)
@@ -280,8 +277,6 @@ def read_job_data_single_account(account_id: str, db_user: Tuple[Session, models
 
         logger.info("Successfully retrieved job data for account ID: %s", account_id)
         return db_items
-    except HTTPException as e:
-        raise e
     except Exception as e:
         logger.error("Unexpected error while fetching job data for account ID %s: %s", account_id, str(e))
         raise HTTPException(status_code=500, detail=str(e))
@@ -302,7 +297,7 @@ def read_job_data_single_exit_code(exit_code: str, db_user: Tuple[Session, model
     db, current_user = db_user
     try:
         logger.info("Fetching job data for exit code: %s", exit_code)
-        db_items = crud.get_job_data_by_exit_code(db, exit_code=exit_code, row_limit=ROW_LIMIT)
+        db_items = crud.get_job_data_by_exit_code(exit_code=exit_code, row_limit=ROW_LIMIT)
 
         if not db_items:
             logger.warning("No job data found for exit code: %s", exit_code)
@@ -310,8 +305,6 @@ def read_job_data_single_exit_code(exit_code: str, db_user: Tuple[Session, model
 
         logger.info("Successfully retrieved job data for exit code: %s", exit_code)
         return db_items
-    except HTTPException as e:
-        raise e
     except Exception as e:
         logger.error("Unexpected error while fetching job data for exit code %s: %s", exit_code, str(e))
         raise HTTPException(status_code=500, detail=str(e))
@@ -329,12 +322,13 @@ def read_host_data_single_jid(job_data_id: str, db_user: Tuple[Session, models.A
     Session, models.ApiUser]): A tuple containing the database session and the current authenticated user.
 
     :return: List[schemas.HostData]: A list of HostData records where the job_data_id is associated with the job data
-    records. :raises HTTPException: If no records are found or if there is a database error.
+    records.
+    :raises HTTPException: If no records are found or if there is a database error.
     """
     db, current_user = db_user
     try:
         logger.info("Fetching host data for job data ID: %s", job_data_id)
-        db_items = crud.get_host_data_by_job_id(db, job_data_id=job_data_id, row_limit=ROW_LIMIT)
+        db_items = crud.get_host_data_by_job_id(job_data_id=job_data_id, row_limit=ROW_LIMIT)
 
         if not db_items:
             logger.warning("No host data found for job data ID: %s", job_data_id)
@@ -342,11 +336,9 @@ def read_host_data_single_jid(job_data_id: str, db_user: Tuple[Session, models.A
 
         logger.info("Successfully retrieved host data for job data ID: %s", job_data_id)
         return db_items
-    except HTTPException as e:
-        raise e
     except Exception as e:
         logger.error("Unexpected error while fetching host data for job data ID %s: %s", job_data_id, str(e))
-        raise HTTPException(status_code=500, detail=str(e))
+        raise Exception(status_code=500, detail=str(e))
 
 
 @app.get("/host_data_node_id/{node_id}", response_model=List[schemas.HostData])
@@ -363,7 +355,7 @@ def read_host_data_single_node(node_id: str, db_user: Tuple[Session, models.ApiU
     db, current_user = db_user
     try:
         logger.info("Fetching host data for node ID: %s", node_id)
-        db_items = crud.get_host_data_by_host_id(db, host_id=node_id, row_limit=ROW_LIMIT)
+        db_items = crud.get_host_data_by_host_id(host_id=node_id, row_limit=ROW_LIMIT)
 
         if not db_items:
             logger.warning("No host data found for node ID: %s", node_id)
@@ -371,8 +363,6 @@ def read_host_data_single_node(node_id: str, db_user: Tuple[Session, models.ApiU
 
         logger.info("Successfully retrieved host data for node ID: %s", node_id)
         return db_items
-    except HTTPException as e:
-        raise e
     except Exception as e:
         logger.error("Unexpected error while fetching host data for node ID %s: %s", node_id, str(e))
         raise HTTPException(status_code=500, detail=str(e))
