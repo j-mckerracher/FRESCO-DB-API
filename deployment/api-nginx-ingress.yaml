@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: fresco-api-ingress
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+      - www.api.fresco-hpc.org
+      secretName: fresco-api-tls
+  rules:
+  - host: www.api.fresco-hpc.org
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: fresco-api-svc
+            port:
+              number: 80

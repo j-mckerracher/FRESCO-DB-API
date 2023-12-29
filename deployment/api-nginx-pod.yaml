@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: fresco-api-pod
+  labels:
+    app: fresco-api
+spec:
+  containers:
+    - name: fresco-api-container
+      image: rkalyana/ccri-fresco-api:nginx
+      ports:
+      - containerPort: 80
+      volumeMounts:
+        - name: nginx-ssl
+          mountPath: /etc/nginx/ssl
+          readOnly: true
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+      env:
+      - name: FASTAPI_SECURITY_KEY
+        value: "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+      - name: FASTAPI_SECURITY_KEY_ALGO
+        value: "HS256"
+      - name: DBUSER
+        value: "fresco"
+      - name: DBPW
+        value: "L!oCf4*2tfA4"
+      - name: DBHOST
+        value: "frescodb"
+      - name: DBNAME
+        value: "anvil"
+      - name: DBUSER_API
+        value: "api_role"
+      - name: DBPW_API
+        value: "5D9WEEyQtNasBMG"
+  volumes:
+    - name: nginx-ssl
+      secret:
+        secretName: fresco-api-tls
+    - name: nginx-config
+      configMap:
+        name: nginx-config
+        items:
+        - key: default
+          path: default.conf
